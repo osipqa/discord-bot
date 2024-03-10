@@ -3,6 +3,7 @@ const { ConsoleColors } = require("./utils/consoleColors");
 const { token } = require("./utils/config");
 
 
+/* Это та же штука про команды
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 
@@ -20,7 +21,7 @@ const commands = [
     description: "Показывает ваш онлайн-статус на сервере.",
   }
 ];
-
+*/
 
 const client = new Client({
   intents: [
@@ -60,11 +61,12 @@ client.once("ready", async () => {
     console.log("");
     console.log("Ссылка для приглашения бота на сервер:");
     console.log(
-      `> https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=applications.commands%20bot`,
+      `> https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=applications.commands%20bot`, // ВКЛЮЧЕНЫ АДМИН ПРАВА, ПРЕДУПРЕЖДАЮ!
     );
     console.log("");
 
- 
+ /* Лень переделывать, пока что будет так. Добавили команду - раскоментили, деплойнули, закоменитили
+
     const rest = new REST({ version: "9" }).setToken(token);
 
     try {
@@ -79,6 +81,7 @@ client.once("ready", async () => {
     } catch (error) {
       console.error(error);
     }
+  */
 
 });
 
