@@ -13,7 +13,7 @@ const commands = [
   },
   {
     name: "clear",
-    description: "Удалить сообщение пользователей (50 штук)",
+    description: "Удалить сообщение пользователей (50)",
   },
   {
     name: "status",
@@ -116,13 +116,21 @@ async function updateGlobalCommands(client, rest, commands) {
 //  await updateGlobalCommands(client, rest, commands);         - ОБНОВИТЬ (ЗАЧЕМ?)
 
 client.once("ready", async () => {
-  updateGlobalCommands(client, rest, commands)
+  await updateGlobalCommands(client, rest, commands);
     console.log(
       ConsoleColors.Success + "Бот успешно активирован." + ConsoleColors.Reset,
     );
     console.log(`${client.user.tag} | ${client.user.id}`);
     console.log("");
     const command = await rest.get(Routes.applicationCommands(client.user.id));
+    
+    client.user.setPresence({
+      activities: {
+        name: 'Counter-Strike 2',
+        type: 'PLAYING'
+      },
+      status: 'online'
+    });
 
     console.log("Список глобальных команд приложения (/):", command);
 
@@ -162,32 +170,6 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-
-client.on('message', async message => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
-
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
-
-  if (command === 'clears') {
-      // Проверяем, есть ли у пользователя разрешение на управление сообщениями
-      if (message.member.hasPermission('MANAGE_MESSAGES')) {
-          const amount = parseInt(args[0]);
-
-          if (isNaN(amount)) {
-              return message.reply('Укажите число сообщений для удаления.');
-          } else if (amount <= 0 || amount > 100) {
-              return message.reply('Укажите число от 1 до 100.');
-          }
-
-          // Удаляем сообщения
-          await message.channel.bulkDelete(amount + 1);
-          message.channel.send(`Удалено ${amount} сообщений.`).then(msg => msg.delete({ timeout: 5000 }));
-      } else {
-          message.reply('У вас нет прав на использование этой команды.');
-      }
-  }
-});
 
 client.login(token).catch(error => {
   console.error('Ошибка входа бота:', error);
