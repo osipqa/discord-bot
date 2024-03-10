@@ -3,7 +3,6 @@ const { ConsoleColors } = require("./utils/consoleColors");
 const { token } = require("./utils/config");
 
 
-/* Это та же штука про команды
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 
@@ -14,14 +13,14 @@ const commands = [
   },
   {
     name: "clear",
-    description: "Удалить сообщение пользователей",
+    description: "Удалить сообщение пользователей (50 штук)",
   },
   {
     name: "status",
     description: "Показывает ваш онлайн-статус на сервере.",
   }
 ];
-*/
+
 
 const client = new Client({
   intents: [
@@ -53,36 +52,141 @@ client.commands.set("online", require("./commands/online"));
 client.commands.set("clear", require("./commands/clear"));
 client.commands.set("status", require("./commands/status"));
 
+const rest = new REST({ version: "9" }).setToken(token);
+
+async function deleteGlobalCommands(client, rest) {
+  try {
+    console.log("Начато удаление глобальных команд приложения (/).");
+
+    // Получаем текущие глобальные команды
+    const existingCommands = await rest.get(
+      Routes.applicationCommands(client.user.id)
+    );
+
+    // Удаляем существующие глобальные команды
+    await rest.put(
+      Routes.applicationCommands(client.user.id),
+      { body: [] }
+    );
+
+    console.log("Завершено удаление глобальных команд приложения (/).");
+
+  } catch (error) {
+    console.error("Ошибка при удалении глобальных команд:", error);
+  }
+}
+
+async function addGlobalCommands(client, rest, commands) {
+  try {
+    console.log("Начато добавление глобальных команд приложения (/).");
+
+    // Создаем глобальные команды
+    const addedCommands = await rest.put(
+      Routes.applicationCommands(client.user.id),
+      { body: commands }
+    );
+
+    console.log("Завершено добавление глобальных команд приложения (/).", addedCommands);
+
+  } catch (error) {
+    console.error("Ошибка при добавлении глобальных команд:", error);
+  }
+}
+
+async function updateGlobalCommands(client, rest, commands) {
+  try {
+    console.log("Начато обновление глобальных команд приложения (/).");
+
+    // Обновляем глобальные команды
+    const updatedCommands = await rest.put(
+      Routes.applicationCommands(client.user.id),
+      { body: commands }
+    );
+
+    console.log("Завершено обновление глобальных команд приложения (/).", updatedCommands);
+
+  } catch (error) {
+    console.error("Ошибка при обновлении глобальных команд:", error);
+  }
+}
+
+
+//  await deleteGlobalCommands(client, rest);                   - УДАЛИТЬ
+//  await addGlobalCommands(client, rest, commands);            - ДОБАВИТЬ
+//  await updateGlobalCommands(client, rest, commands);         - ОБНОВИТЬ (ЗАЧЕМ?)
+
 client.once("ready", async () => {
+  updateGlobalCommands(client, rest, commands)
     console.log(
       ConsoleColors.Success + "Бот успешно активирован." + ConsoleColors.Reset,
     );
     console.log(`${client.user.tag} | ${client.user.id}`);
     console.log("");
+    const command = await rest.get(Routes.applicationCommands(client.user.id));
+
+    console.log("Список глобальных команд приложения (/):", command);
+
     console.log("Ссылка для приглашения бота на сервер:");
     console.log(
       `> https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=applications.commands%20bot`, // ВКЛЮЧЕНЫ АДМИН ПРАВА, ПРЕДУПРЕЖДАЮ!
     );
     console.log("");
 
- /* Лень переделывать, пока что будет так. Добавили команду - раскоментили, деплойнули, закоменитили
+});
 
-    const rest = new REST({ version: "9" }).setToken(token);
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
 
-    try {
-      console.log("Начата обновление глобальных команд приложения (/).");
+  const { commandName } = interaction;
 
-      // Создаем глобальные команды
-      await rest.put(Routes.applicationCommands(client.user.id), {
-        body: commands,
-      });
+  if (!client.commands.has(commandName)) return;
 
-      console.log("Успешно обновлены глобальные команды приложения (/).");
-    } catch (error) {
-      console.error(error);
+  try {
+    const command = client.commands.get(commandName);
+    if (command) {
+      await command.execute(interaction);
+    } else {
+      console.error(`Команда не найдена: ${commandName}`);
+      await interaction.reply({ content: `Произошла ошибка при выполнении команды. ${commandName}`, ephemeral: true });
     }
-  */
+  } catch (error) {
+    console.error(error);
+  
+    // Выводим дополнительные детали об ошибке в консоль
+    if (error instanceof Error && error.message) {
+      console.error('Error message:', error.message);
+    }
+  
+    // Отправляем ответ с информацией об ошибке в чат
+    await interaction.reply({ content: `Произошла ошибка при выполнении команды. ${error.message}`, ephemeral: true });
+  }
+});
 
+
+client.on('message', async message => {
+  if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
+  const command = args.shift().toLowerCase();
+
+  if (command === 'clears') {
+      // Проверяем, есть ли у пользователя разрешение на управление сообщениями
+      if (message.member.hasPermission('MANAGE_MESSAGES')) {
+          const amount = parseInt(args[0]);
+
+          if (isNaN(amount)) {
+              return message.reply('Укажите число сообщений для удаления.');
+          } else if (amount <= 0 || amount > 100) {
+              return message.reply('Укажите число от 1 до 100.');
+          }
+
+          // Удаляем сообщения
+          await message.channel.bulkDelete(amount + 1);
+          message.channel.send(`Удалено ${amount} сообщений.`).then(msg => msg.delete({ timeout: 5000 }));
+      } else {
+          message.reply('У вас нет прав на использование этой команды.');
+      }
+  }
 });
 
 client.login(token).catch(error => {
