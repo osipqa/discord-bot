@@ -1,0 +1,24 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "osipQa",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/rest": "^2.2.0",
+    "@types/node": "^18.0.6",
+    "axios": "^1.6.7",
+    "discord-api-types": "^0.37.73",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
