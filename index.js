@@ -1,175 +1,185 @@
-const { Client, Collection } = require("discord.js");
-const { ConsoleColors } = require("./utils/consoleColors");
-const { token } = require("./utils/config");
+const { Client, Collection } = require('discord.js');
+const { ConsoleColors } = require('./utils/consoleColors');
+const { token, role_id, server_id, mainChannel_id } = require('./utils/config');
 
-
-const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
 
 const commands = [
   {
-    name: "online",
-    description: "Показывает список пользователей, находящихся в онлайне.",
+    name: 'online',
+    description: 'Показывает список пользователей, находящихся в онлайне + общее время.',
+    options: [
+      {
+        name: 'user',
+        type: 6,
+        description: 'Указанный пользователь (оставьте пустым для списка всех)',
+        required: false,
+      },
+    ],
   },
   {
-    name: "clear",
-    description: "Удалить сообщение пользователей (50)",
+    name: 'clear',
+    description: 'Удалить сообщение пользователей (100)',
+    options: [
+      {
+        name: 'amount',
+        type: 4,
+        description: 'Количество сообщений для удаления (100)',
+        required: false,
+      },
+    ],
   },
   {
-    name: "status",
-    description: "Показывает ваш онлайн-статус на сервере.",
-  }
+    name: 'updateroles',
+    description: 'Обновить роли для всех участников.',
+    options: [
+      {
+        name: 'rolename',
+        type: 3,
+        description: 'Имя роли для обновления',
+        required: true,
+      },
+    ],
+  },
+  {
+    name: 'status',
+    description: 'Показывает ваш онлайн-статус на сервере.',
+  },
 ];
-
 
 const client = new Client({
   intents: [
-    1 << 0, // GUILDS
-    1 << 1, // GUILD_MEMBERS
-    1 << 2, // GUILD_MODERATION
-    1 << 3, // GUILD_EMOJIS_AND_STICKERS
-    1 << 4, // GUILD_INTEGRATIONS
-    1 << 5, // GUILD_WEBHOOKS
-    1 << 6, // GUILD_INVITES
-    1 << 7, // GUILD_VOICE_STATES
-    1 << 8, // GUILD_PRESENCES
-    1 << 9, // GUILD_MESSAGES
-    1 << 10, // GUILD_MESSAGE_REACTIONS
-    1 << 11, // GUILD_MESSAGE_TYPING
-    1 << 12, // DIRECT_MESSAGES
-    1 << 13, // DIRECT_MESSAGE_REACTIONS
-    1 << 14, // DIRECT_MESSAGE_TYPING
-    1 << 15, // MESSAGE_CONTENT
-    1 << 16, // GUILD_SCHEDULED_EVENTS
-    1 << 20, // AUTO_MODERATION_CONFIGURATION
-    1 << 21, // AUTO_MODERATION_EXECUTION
+    1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7, 1 << 8, 1 << 9,
+    1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1 << 20, 1 << 21,
   ],
 });
 
 client.commands = new Collection();
 
-client.commands.set("online", require("./commands/online"));
-client.commands.set("clear", require("./commands/clear"));
-client.commands.set("status", require("./commands/status"));
-
-const rest = new REST({ version: "9" }).setToken(token);
+const rest = new REST({ version: '9' }).setToken(token);
 
 async function deleteGlobalCommands(client, rest) {
   try {
-    console.log("Начато удаление глобальных команд приложения (/).");
-
-    // Получаем текущие глобальные команды
-    const existingCommands = await rest.get(
-      Routes.applicationCommands(client.user.id)
-    );
-
-    // Удаляем существующие глобальные команды
-    await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: [] }
-    );
-
-    console.log("Завершено удаление глобальных команд приложения (/).");
-
+    console.log('Начато удаление глобальных команд приложения (/).');
+    await rest.put(Routes.applicationCommands(client.user.id), { body: [] });
+    console.log('Завершено удаление глобальных команд приложения (/).');
   } catch (error) {
-    console.error("Ошибка при удалении глобальных команд:", error);
+    console.error('Ошибка при удалении глобальных команд:', error);
   }
 }
 
 async function addGlobalCommands(client, rest, commands) {
   try {
-    console.log("Начато добавление глобальных команд приложения (/).");
-
-    // Создаем глобальные команды
-    const addedCommands = await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commands }
-    );
-
-    console.log("Завершено добавление глобальных команд приложения (/).", addedCommands);
-
+    console.log('Начато добавление глобальных команд приложения (/).');
+    const addedCommands = await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
+    console.log('Завершено добавление глобальных команд приложения (/).', addedCommands);
   } catch (error) {
-    console.error("Ошибка при добавлении глобальных команд:", error);
+    console.error('Ошибка при добавлении глобальных команд:', error);
   }
 }
 
 async function updateGlobalCommands(client, rest, commands) {
   try {
-    console.log("Начато обновление глобальных команд приложения (/).");
-
-    // Обновляем глобальные команды
-    const updatedCommands = await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commands }
-    );
-
-    console.log("Завершено обновление глобальных команд приложения (/).", updatedCommands);
-
+    console.log('');
+    console.log('Начато обновление глобальных команд приложения (/).');
+    const updatedCommands = await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
+    console.log('Завершено обновление глобальных команд приложения (/).');
+    console.log('');
   } catch (error) {
-    console.error("Ошибка при обновлении глобальных команд:", error);
+    console.error('Ошибка при обновлении глобальных команд:', error);
   }
 }
 
+const updaterolesCommand = require('./commands/updateroles');
+const onlineCommand = require('./commands/online');
+client.commands.set('updateroles', updaterolesCommand);
+client.commands.set('online', onlineCommand);
 
-//  await deleteGlobalCommands(client, rest);                   - УДАЛИТЬ
-//  await addGlobalCommands(client, rest, commands);            - ДОБАВИТЬ
-//  await updateGlobalCommands(client, rest, commands);         - ОБНОВИТЬ (ЗАЧЕМ?)
-
-client.once("ready", async () => {
+client.once('ready', async () => {
   await updateGlobalCommands(client, rest, commands);
-    console.log(
-      ConsoleColors.Success + "Бот успешно активирован." + ConsoleColors.Reset,
-    );
-    console.log(`${client.user.tag} | ${client.user.id}`);
-    console.log("");
-    const command = await rest.get(Routes.applicationCommands(client.user.id));
-    
-    client.user.setPresence({
-      activities: {
-        name: 'Counter-Strike 2',
-        type: 'PLAYING'
-      },
-      status: 'online'
-    });
-
-    console.log("Список глобальных команд приложения (/):", command);
-
-    console.log("Ссылка для приглашения бота на сервер:");
-    console.log(
-      `> https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=applications.commands%20bot`, // ВКЛЮЧЕНЫ АДМИН ПРАВА, ПРЕДУПРЕЖДАЮ!
-    );
-    console.log("");
-
+  console.log(ConsoleColors.Success + 'Бот успешно активирован.' + ConsoleColors.Reset);
+  console.log(`${ConsoleColors.Warning}${client.user.tag} ${ConsoleColors.Reset}|${ConsoleColors.Warning} ${client.user.id} ${ConsoleColors.Reset}`);
+  console.log('');
+  console.log('Ссылка для приглашения бота на сервер:');
+  console.log('');
+  console.log(`>${ConsoleColors.Error} https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=applications.commands%20bot`,);
+  console.log('' + ConsoleColors.Reset);
 });
+
+client.on('guildMemberAdd', (member) => {
+  const guild = member.guild;
+  const role = guild.roles.cache.get(role_id);
+
+  if (role) {
+    member.roles.add(role).catch(console.error);
+    const channel = guild.systemChannel;
+    if (channel) {
+      channel.send(`Добро пожаловать, ${member.user.tag}! Роль "${role.name}" была присвоена.`);
+    }
+  } else {
+    console.error(`Роль с ID ${roleId} не найдена.`);
+  }
+});
+
+client.on('ready', () => {
+  console.log(`Бот вошел как ${client.user.tag}`);
+
+  const guild = client.guilds.cache.get(server_id);
+  const role = guild?.roles.cache.get(role_id);
+  const channel = guild?.channels.cache.get(mainChannel_id);
+
+  if (role) {
+    guild.members.cache.forEach((member) => {
+      // Проверяем, есть ли у пользователя уже данная роль
+      if (!member.roles.cache.has(role_id)) {
+        // Добавляем роль пользователю
+        member.roles.add(role).catch(console.error);
+        
+        // Проверяем, есть ли целевой канал
+        if (channel) {
+          // Отправляем сообщение в целевой канал
+          channel.send(`Внимание, ${member.user.tag}! Роли были обновлены. Теперь у вас есть роль ${role.name}.`);
+        } else {
+          console.error(`Целевой канал не найден на ${guild.name}.`);
+        }
+      }
+    });
+    console.log(`Роли обновлены для всех участников в ${guild.name}.`);
+  } else {
+    console.error(`Роль с ID ${role_id} не найдена.`);
+  }
+});
+
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
-  const { commandName } = interaction;
+  const { commandName, options } = interaction;
 
-  if (!client.commands.has(commandName)) return;
-
-  try {
-    const command = client.commands.get(commandName);
-    if (command) {
-      await command.execute(interaction);
+  if (commandName === 'updateroles') {
+    const updaterolesCommand = client.commands.get('updateroles');
+    if (updaterolesCommand) {
+      await updaterolesCommand.execute(interaction);
     } else {
-      console.error(`Команда не найдена: ${commandName}`);
-      await interaction.reply({ content: `Произошла ошибка при выполнении команды. ${commandName}`, ephemeral: true });
+      console.error('Команда не найдена: updateroles');
     }
-  } catch (error) {
-    console.error(error);
-  
-    // Выводим дополнительные детали об ошибке в консоль
-    if (error instanceof Error && error.message) {
-      console.error('Error message:', error.message);
+  } else if (commandName === 'clear') {
+    const { clear } = require('./commands/clear');
+    await clear(interaction, options?.getInteger('amount'));
+  } else if (commandName === 'status') {
+    const statusCommand = require('./commands/status');
+    await statusCommand.execute(interaction);
+  } else if (commandName === 'online') {
+    try {
+      const { online } = require('./commands/online');
+      await online(interaction, options);
+    } catch (error) {
+      console.error(`Ошибка выполнения команды online: ${error.message}`);
+      await interaction.reply('Произошла ошибка при выполнении команды online.');
     }
-  
-    // Отправляем ответ с информацией об ошибке в чат
-    await interaction.reply({ content: `Произошла ошибка при выполнении команды. ${error.message}`, ephemeral: true });
   }
 });
-
 
 client.login(token).catch(error => {
   console.error('Ошибка входа бота:', error);

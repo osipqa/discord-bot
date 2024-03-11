@@ -1,6 +1,6 @@
 {
   "name": "nodejs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,8 @@
     "discord-api-types": "^0.37.73",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
-    "node-fetch": "^3.2.6"
+    "node-fetch": "^3.2.6",
+    "openai": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
