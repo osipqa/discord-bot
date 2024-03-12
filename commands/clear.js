@@ -1,6 +1,11 @@
 async function clear(interaction, amount = 100) {
   try {
     const textChannel = interaction.channel;
+    if (!interaction.member.roles.cache.some(role => role.name === 'Администратор')) {
+      await interaction.reply('У вас нет прав для выполнения этой команды.');
+      return;
+    }
+
     const messages = await textChannel.messages.fetch({ limit: amount });
     await textChannel.bulkDelete(messages, true);
     await interaction.reply(`Удалено ${messages.size} сообщений.`);
@@ -10,6 +15,4 @@ async function clear(interaction, amount = 100) {
   }
 }
 
-module.exports = {
-  clear,
-};
+module.exports = { clear };

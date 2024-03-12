@@ -91,11 +91,6 @@ async function updateGlobalCommands(client, rest, commands) {
   }
 }
 
-const updaterolesCommand = require('./commands/updateroles');
-const onlineCommand = require('./commands/online');
-client.commands.set('updateroles', updaterolesCommand);
-client.commands.set('online', onlineCommand);
-
 client.once('ready', async () => {
   await updateGlobalCommands(client, rest, commands);
   console.log(ConsoleColors.Success + 'Бот успешно активирован.' + ConsoleColors.Reset);
@@ -131,14 +126,9 @@ client.on('ready', () => {
 
   if (role) {
     guild.members.cache.forEach((member) => {
-      // Проверяем, есть ли у пользователя уже данная роль
       if (!member.roles.cache.has(role_id)) {
-        // Добавляем роль пользователю
         member.roles.add(role).catch(console.error);
-        
-        // Проверяем, есть ли целевой канал
         if (channel) {
-          // Отправляем сообщение в целевой канал
           channel.send(`Внимание, ${member.user.tag}! Роли были обновлены. Теперь у вас есть роль ${role.name}.`);
         } else {
           console.error(`Целевой канал не найден на ${guild.name}.`);
@@ -158,26 +148,17 @@ client.on('interactionCreate', async interaction => {
   const { commandName, options } = interaction;
 
   if (commandName === 'updateroles') {
-    const updaterolesCommand = client.commands.get('updateroles');
-    if (updaterolesCommand) {
-      await updaterolesCommand.execute(interaction);
-    } else {
-      console.error('Команда не найдена: updateroles');
-    }
+    const { updateRoles } = require('./commands/updateroles');
+    await updateRoles(interaction);
   } else if (commandName === 'clear') {
     const { clear } = require('./commands/clear');
     await clear(interaction, options?.getInteger('amount'));
   } else if (commandName === 'status') {
-    const statusCommand = require('./commands/status');
-    await statusCommand.execute(interaction);
+    const { status } = require('./commands/status');
+    await status(interaction);
   } else if (commandName === 'online') {
-    try {
-      const { online } = require('./commands/online');
-      await online(interaction, options);
-    } catch (error) {
-      console.error(`Ошибка выполнения команды online: ${error.message}`);
-      await interaction.reply('Произошла ошибка при выполнении команды online.');
-    }
+    const { online } = require('./commands/online');
+    await online(interaction, options);
   }
 });
 

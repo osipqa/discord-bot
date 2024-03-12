@@ -1,5 +1,11 @@
 async function online(interaction, options) {
   const guild = interaction.guild;
+  
+  if (!interaction.member.roles.cache.some(role => role.name === 'Администратор')) {
+    await interaction.reply('У вас нет прав для выполнения этой команды.');
+    return;
+  }
+
   if (!guild) {
     await interaction.reply('Эта команда может быть использована только на сервере.');
     return;
@@ -8,7 +14,6 @@ async function online(interaction, options) {
   const mentionedUser = options.getUser('user');
 
   function formatOnlineTime(member) {
-    // Implement the logic for formatting online time
     const joinedTimestamp = member.joinedTimestamp / 1000;
     const currentTime = Math.floor(Date.now() / 1000);
     const onlineTimeSeconds = currentTime - joinedTimestamp;

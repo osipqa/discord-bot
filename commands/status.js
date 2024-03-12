@@ -1,14 +1,11 @@
-module.exports = {
-  description: 'Показывает ваш статус на сервере.',
-  execute: async (interaction) => {
-    console.log(`Команда 'status' была использована пользователем ${interaction.user.tag}.`);
-    const member = interaction.guild.members.cache.get(interaction.user.id);
-    if (member) {
-      const formattedTime = calculateOnlineTime(member);
-      await interaction.reply(`Вы на сервере уже ${formattedTime}.`);
-    }
-  },
-};
+async function status(interaction) {
+  console.log(`Команда 'status' была использована пользователем ${interaction.user.tag}.`);
+  const member = interaction.guild.members.cache.get(interaction.user.id);
+  if (member) {
+    const formattedTime = calculateOnlineTime(member);
+    await interaction.reply(`Вы на сервере уже ${formattedTime}.`);
+  }
+}
 
 function calculateOnlineTime(member) {
   const joinedTimestamp = member.joinedTimestamp / 1000;
@@ -42,3 +39,5 @@ function calculateOnlineTime(member) {
 
   return formattedTime;
 }
+
+module.exports = { status };
